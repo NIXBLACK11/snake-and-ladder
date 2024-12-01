@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.font-color {
+    color: #EEE4B1;
+}
+
+.bg-color {
+    background-color: #EEE4B1;
+}
+
+
+
+.text-color-blue{
+    color: #1295e7;
+}
+.text-color-yellow{
+    color: #ffde15;
+}
+.text-color-green{
+    color: #0a9844;
+}
+.text-color-red{
+    color: #e9161f;
+}
+.text-color-black{
+    color: black;
+}
+
+#ludo-board{
+  position: relative;
+}
+
+.piece{
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%; /* Circular shape */
+  border: 3px solid #bbbdb7; /* Solid border for a realistic look */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.5); /* Realistic outer and inner shadows */
+  position: absolute;
+}
+
+
+.piece.highlight {
+    cursor: pointer;
+    border: 2px dashed;
+    animation: grow-shrink 1s infinite alternate, color-change 1s infinite alternate, shadow-pulse 1s infinite alternate;
+    border-radius: 50%; /* Make the pieces round */
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    z-index: 100;
+}
+
+@keyframes grow-shrink {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(0.9);
+    }
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    50% {
+        transform: rotate(10deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes color-change {
+    0%, 100% {
+        border-color: grey;
+    }
+    50% {
+        border-color: black;
+    }
+}
+
+@keyframes shadow-pulse {
+    0%, 100% {
+        box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 10px 4px rgba(0, 0, 0, 0.8);
+    }
+}
+
+.player-0-piece {
+  background: radial-gradient(circle, #5bb5f7, #1184f0); /* Light blue to dark blue */
+}
+
+.player-1-piece {
+  background: radial-gradient(circle, #f7f968, #ecf542); /* Light yellow to yellow */
+}
+
+.player-2-piece {
+  background: radial-gradient(circle, #73f58a, #42f557); /* Light green to green */
+}
+
+.player-3-piece {
+  background: radial-gradient(circle, #e85766, #d42234); /* Light red to dark red */
+}
+
+
+.player-base {
+    width: 40%;
+    height: 40%;
+    border: 30px solid;
+    position: absolute;
+}
+
+
+#base-0 {
+    bottom: 0;
+    left: 0;
+    border-color: #1295e7;
+}
+
+#base-1{
+    top: 0;
+    left: 0;
+    border-color: #ffde15;
+}
+
+#base-2{
+    top: 0;
+    right: 0;
+    border-color: #0a9844;
+}
+
+#base-3{
+    bottom: 0;
+    right: 0;
+    border-color: #e9161f;
+}
+
+
+.player-base.highlight {
+    animation: border-blink .7s infinite ease-in-out;
+}
+
+@keyframes border-blink {
+    50% {
+        border-color: rgba(255, 255, 255, 0.8);
+    }
+}
