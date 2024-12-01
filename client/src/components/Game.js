@@ -91,6 +91,7 @@ function playMoveSound() {
 }
 
 async function performMoves(moves) {
+  await delay(2000);
   const move = moves[0]; // The first move will always be processed
 
   const pieceId = `p${move.player}`;
@@ -170,7 +171,50 @@ function LudoUI() {
   useEffect(() => {
     unhighlightPiece();
     setIsDiceDisabled(false);
-  }, [turn]);
+
+    if (gameRef?.current !== undefined) {
+      const positions = gameRef.current.CURRENT_POSITIONS;
+
+      // Count how many pieces are at each position
+      const positionCounts = positions.reduce((acc, value, index) => {
+        if (value !== 0) {
+          acc[value] = (acc[value] || 0) + 1;
+        }
+        return acc;
+      }, {});
+
+      // Offsets for movement (in pixels)
+      const offsets = [
+        { x: -5, y: 10 }, // Move top-left by 10px horizontally and 10px vertically
+        { x: 10, y: 10 }, // Move top-right by 10px horizontally and 10px vertically
+        { x: -5, y: -5 }, // Move bottom-left by 10px horizontally and 10px vertically
+        { x: 10, y: -5 }, // Move bottom-right by 10px horizontally and 10px vertically
+      ];
+
+      positions.forEach((position, index) => {
+        // Only move the piece of the current player (based on gameRef.current.TURN)
+        if (position === 0 || positionCounts[position] <= 1) return;
+
+        const pieceId = `p${index}`;
+        const pieceElement = document.getElementById(pieceId);
+
+        if (pieceElement) {
+          movePiece(pieceId, position);
+          const currentBottom = Number(
+            parseFloat(window.getComputedStyle(pieceElement).bottom),
+          );
+          const currentLeft = Number(
+            parseFloat(window.getComputedStyle(pieceElement).left),
+          );
+
+          const offset = offsets[index % offsets.length]; // Ensure the offsets are valid
+
+          pieceElement.style.bottom = `${currentBottom + offset.y}px`;
+          pieceElement.style.left = `${currentLeft + offset.x}px`;
+        }
+      });
+    }
+  }, [turn]); // Trigger this effect when it's the next player's turn
 
   const handleDice = (value) => {
     if (colors[gameRef.current.TURN] === color) {
@@ -180,7 +224,6 @@ function LudoUI() {
 
   const handleRoll = (value) => {
     setDiceValue(value);
-    delay(1000);
     if (colors[gameRef.current.TURN] === color) {
       getMoves(socket, code, gameRef.current.TURN, value);
     }
@@ -190,7 +233,7 @@ function LudoUI() {
   useEffect(() => {
     if (!socket) return;
 
-    const handleMessage = (event) => {
+    const handleMessage = async (event) => {
       try {
         const message = JSON.parse(event.data.toString());
         console.log("Message from server:", message);
@@ -204,11 +247,11 @@ function LudoUI() {
           const result = message.result;
           gameRef.current.move(message.diceValue, message.game_player);
           if (result != null && result.isValid) {
-            performMoves(result.moves);
+            await performMoves(result.moves);
           }
           setTurn(gameRef.current.TURN);
-          setIsDiceDisabled(false);
           setCanMove(false);
+          setIsDiceDisabled(false);
           unhighlightPiece();
         } else if (message.type === "player_won") {
           setPlayerWon(message.player);
@@ -219,6 +262,15 @@ function LudoUI() {
           movePiece(`p${message.player}`, Number(message.position));
         } else if (message.type == "player_left") {
           toast.error("Player Left! : " + colors[Number(message.player)]);
+          gameRef.current.PLAYERS_LEFT[Number(message.player)] = 1;
+          document.getElementById(`p${message.player}`).style.display = "none";
+          if (gameRef.current.TURN === Number(message.player)) {
+            gameRef.current.switchTurn();
+            setTurn(gameRef.current.TURN);
+            setCanMove(false);
+            setIsDiceDisabled(false);
+            unhighlightPiece();
+          }
         } else if (message.type == "wont_work") {
           toast.error("This won't work baby!");
         }
@@ -309,15 +361,25 @@ function LudoUI() {
                 Home
               </button>
             ) : (
-              <Dice
-                id="dice"
-                ref={diceRef}
-                disabled={isDiceDisabled}
-                rollingTime={700}
-                size={70}
-                onRoll={handleDice}
-                sound={"/dice.mp3"}
-              />
+              <div
+                className={
+                  (gameRef?.current?.TURN !== undefined &&
+                    colors[gameRef.current.TURN] === color) ||
+                  (gameRef?.current?.TURN === undefined && colors[0] === color)
+                    ? "glow"
+                    : ""
+                }
+              >
+                <Dice
+                  id="dice"
+                  ref={diceRef}
+                  disabled={isDiceDisabled}
+                  rollingTime={700}
+                  size={80}
+                  onRoll={handleDice}
+                  sound={"/dice.mp3"}
+                />
+              </div>
             )}
           </div>
         </div>
@@ -326,44 +388,6 @@ function LudoUI() {
         )}
 
         <Toaster position="top-center" reverseOrder={false} />
-      </div>
-
-      <div className="flex justify-center mt-4">
-        <form
-          onSubmit={handleTest}
-          className="flex flex-col items-center bg-gray-800 p-4 rounded-lg bg-opacity-70"
-        >
-          <div className="mb-2">
-            <label className="text-white font-bold mr-2" htmlFor="piece">
-              Piece:
-            </label>
-            <input
-              type="text"
-              id="piece"
-              name="piece"
-              className="p-1 rounded-md"
-              required
-            />
-          </div>
-          <div className="mb-2">
-            <label className="text-white font-bold mr-2" htmlFor="position">
-              Position:
-            </label>
-            <input
-              type="text"
-              id="position"
-              name="position"
-              className="p-1 rounded-md"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-blue-500 text-white font-bold py-1 px-4 rounded-lg mt-2 hover:bg-blue-700"
-          >
-            Submit
-          </button>
-        </form>
       </div>
     </>
   );

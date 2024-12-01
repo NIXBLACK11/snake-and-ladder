@@ -14,7 +14,7 @@ const {
 const app = express();
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
-const debug = true;
+const debug = false;
 
 // CORS setup
 const corsOptions = {

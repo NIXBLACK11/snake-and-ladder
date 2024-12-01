@@ -23,6 +23,7 @@ class SnakesAndLadders {
     this.CURRENT_POSITIONS = [0, 0, 0, 0];
     this.TURN = 0;
     this.WINNER = null;
+    this.PLAYERS_LEFT = new Array(numPlayers).fill(0);
   }
 
   isValidPosition(position) {
@@ -56,8 +57,13 @@ class SnakesAndLadders {
   }
 
   switchTurn() {
-    this.TURN++;
-    this.TURN = this.TURN % this.NUM_PLAYERS;
+    this.TURN = (this.TURN + 1) % this.NUM_PLAYERS;
+    let count = 0;
+    while (this.PLAYERS_LEFT[this.TURN] === 1) {
+      count++;
+      this.TURN = (this.TURN + 1) % this.NUM_PLAYERS;
+      if (count >= this.NUM_PLAYERS) break;
+    }
   }
 
   move(diceValue, gamePlayer) {
@@ -82,7 +88,6 @@ class SnakesAndLadders {
 
     // Check if move is valid (doesn't exceed board size)
     if (newPosition > BOARD_SIZE) {
-      console.log(this.CURRENT_POSITIONS);
       this.switchTurn();
       return {
         player: currentPlayer,

@@ -49,7 +49,8 @@ function Landing() {
   useEffect(() => {
     // Establish WebSocket connection on component mount
     if (socket) return;
-    const ws = new WebSocket("ws://localhost:5000"); // Replace with your WebSocket URL
+    const ws = new WebSocket("wss://snl.nixarcade.fun/ws"); // Replace with your WebSocket URL
+    // const ws = new WebSocket("ws://localhost:5000/"); // Replace with your WebSocket URL
 
     ws.onopen = () => {
       console.log("Connected to WebSocket server");
@@ -86,6 +87,9 @@ function Landing() {
             break;
           case "game_full":
             toast.error("Game is already full.");
+            break;
+          case "game_started":
+            toast.error("Game already started.");
             break;
           case "start_game":
             setCode(message.gameCode);

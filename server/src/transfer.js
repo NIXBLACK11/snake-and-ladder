@@ -1,26 +1,58 @@
 const axios = require("axios");
 
-const transfer = async (walletAddress, token, amount, apiSecret) => {
+const setValidGameFalse = async (address) => {
   try {
+    const response = await axios.post(
+      `https://nixarcade-backend.vercel.app/user/setValidGameFalse`,
+      { address },
+    );
+    console.log(response.data.message);
+  } catch (error) {
+    console.error(
+      "Error setting valid game to false:",
+      error.response?.data || error.message,
+    );
+  }
+};
+
+const setLeaderBoard = async (address) => {
+  try {
+    const response = await axios.post(
+      `https://nixarcade-backend.vercel.app/user/gameWon`,
+      { address },
+    );
+    console.log(response.data.message);
+  } catch (error) {
+    console.error(
+      "Error setting valid game to false:",
+      error.response?.data || error.message,
+    );
+  }
+};
+
+const transfer = async (walletAddress, amount, apiSecret) => {
+  try {
+    const token = process.env.SECRET;
+
     const response = await axios.post(
       "https://nixarcade-backend.vercel.app/transfer",
       { walletAddress, token, amount },
       {
         headers: {
-          "x-api-secret": apiSecret, // Pass the API secret for verification
-          "Content-Type": "application/json", // Set the content type explicitly
+          "x-api-secret": apiSecret,
+          "Content-Type": "application/json",
         },
       },
     );
-
-    // Assuming the response contains the token in the response body
-    return response.data.token;
+    await setValidGameFalse(walletAddress);
+    await setLeaderBoard(walletAddress);
+    return true;
   } catch (error) {
     console.error(
       "Error generating token:",
       error.response?.data || error.message,
     );
-    return null; // Return null if the request fails
+    return false;
   }
 };
 

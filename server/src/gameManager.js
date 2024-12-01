@@ -1,13 +1,13 @@
 const SnakesAndLadders = require("./engine/SnakesAndLadders");
-// const { transfer } = require("./transfer");
+const { transfer } = require("./transfer");
 
 const games = {}; // Maps gameCode to game data
 
 const colors = ["blue", "yellow", "green", "red"];
 
 let currentDiceValue = -1;
-const token = "rocky";
 const amount = 0.001;
+const SECRET = "apisecret";
 
 function handleError(ws, error, errorType) {
   console.error(`${errorType}:`, error);
@@ -57,6 +57,11 @@ function handleJoinGame(ws, data) {
     const game = games[gameCode];
     if (!game) {
       ws.send(JSON.stringify({ type: "no_game", gameCode }));
+      return;
+    }
+
+    if (game.started) {
+      ws.send(JSON.stringify({ type: "game_started", gameCode }));
       return;
     }
 
@@ -112,29 +117,60 @@ function handleClientDisconnection(ws) {
       const playerIndex = game.players.indexOf(ws);
 
       if (playerIndex !== -1) {
-        game.players.splice(playerIndex, 1);
-        game.publicKeys.splice(playerIndex, 1);
-
-        game.players.forEach((player) => {
-          player.send(
-            JSON.stringify({
-              type: "player_left",
-              gameCode,
-              player: playerIndex,
-            }),
-          );
-        });
-
-        if (game.players.length === 1 && game.started) {
+        if (game.started === false) {
+          game.players.splice(playerIndex, 1);
+          game.publicKeys.splice(playerIndex, 1);
           game.players.forEach((player) => {
-            player.send(JSON.stringify({ type: "player_won", player: -1 }));
+            player.send(
+              JSON.stringify({
+                type: "player_left",
+                gameCode,
+                player: playerIndex,
+              }),
+            );
           });
-          const publicKey = game.publicKeys[0];
-          // transfer(publicKey, token, amount, "apiSecret");
-        }
+          if (game.players.length === 0) {
+            delete games[gameCode];
+          }
+        } else {
+          game.snl.PLAYERS_LEFT[playerIndex] = 1;
+          game.snl.CURRENT_POSITIONS[playerIndex] = 0;
+          if (game.snl.TURN === playerIndex) game.snl.switchTurn();
+          game.players.forEach((player) => {
+            player.send(
+              JSON.stringify({
+                type: "player_left",
+                gameCode,
+                player: playerIndex,
+              }),
+            );
+          });
 
-        if (game.players.length === 0) {
-          delete games[gameCode];
+          const activePlayersCount = game.snl.PLAYERS_LEFT.filter(
+            (status) => status === 0,
+          ).length;
+
+          if (activePlayersCount === 1 && game.started) {
+            const winnerIndex = game.snl.PLAYERS_LEFT.findIndex(
+              (status) => status === 0,
+            );
+
+            game.players.forEach((player) => {
+              player.send(
+                JSON.stringify({ type: "player_won", player: winnerIndex }),
+              );
+            });
+            const publicKey = game.publicKeys[winnerIndex];
+            transfer(publicKey, amount, SECRET);
+          }
+
+          const allPlayersLeft = game.snl.PLAYERS_LEFT.every(
+            (status) => status === 1,
+          );
+
+          if (allPlayersLeft || game.players.length === 0) {
+            delete games[gameCode];
+          }
         }
 
         break;
@@ -207,7 +243,7 @@ function movePiece(ws, data) {
         );
       });
       const publicKey = game.publicKeys[game_player];
-      // transfer(publicKey, token, amount, "apiSecret");
+      transfer(publicKey, amount, SECRET);
       games[gameCode] = null;
       delete games.gameCode;
     }

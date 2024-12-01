@@ -1,6 +1,6 @@
-# **Snakes And Ladders Multiplayer Game**
+# **Ludo Multiplayer Game**
 
-A real-time multiplayer Snakes And Ladders game where players can join, play, and roll dice using WebSocket for seamless interaction. The game supports up to 4 players and offers an intuitive user interface built with modern frontend technologies.
+A real-time multiplayer Ludo game where players can join, play, and roll dice using WebSocket for seamless interaction. The game supports up to 4 players and offers an intuitive user interface built with modern frontend technologies.
 
 <p align="center">
   <img src="ui.png" alt="Website UI" width="45%" />
@@ -24,7 +24,7 @@ A real-time multiplayer Snakes And Ladders game where players can join, play, an
 - Real-time multiplayer gameplay with WebSocket communication.
 - Waiting lobby for players to join via game code.
 - Game starts when 4 players have joined.
-- Visual Snakes And Ladders board displayed in the frontend.
+- Visual Ludo board displayed in the frontend.
 - Dice rolling functionality with controlled server-side validation.
 - Popup notifications for game events like game won, turn skip, etc.
 - Turn management with player skipping logic based on the number of players.
@@ -56,8 +56,8 @@ A real-time multiplayer Snakes And Ladders game where players can join, play, an
 ### **Backend Installation**
 1. Clone the repository:
     ```bash
-    git clone https://github.com/r0ckYr/SnakesAndLadders.git
-    cd SnakesAndLadders/server
+    git clone https://github.com/NIXBLACK11/Ludo.git
+    cd Ludo/server
     ```
 2. Install dependencies:
     ```bash
@@ -71,8 +71,8 @@ A real-time multiplayer Snakes And Ladders game where players can join, play, an
 ### **Frontend Installation**
 1. Clone the frontend repository:
     ```bash
-    git clone https://github.com/r0ckYr/SnakesAndLadders.git
-    cd SnakesAndLadders/client
+    git clone https://github.com/NIXBLACK11/Ludo.git
+    cd Ludo/client
     ```
 2. Install frontend dependencies:
     ```bash
@@ -91,7 +91,7 @@ A real-time multiplayer Snakes And Ladders game where players can join, play, an
 2. Enter a game code or create a new game.
 3. Wait for other players to join.
 4. Once four players have joined, the game will automatically start.
-5. Take turns rolling the dice and moving your pieces across the Snakes And Ladders board.
+5. Take turns rolling the dice and moving your pieces across the Ludo board.
 
 ---
 
@@ -110,7 +110,7 @@ A real-time multiplayer Snakes And Ladders game where players can join, play, an
 - Players interact with the server through WebSocket for actions like rolling dice, moving pieces, etc.
 
 ### **UI Management**
-- The frontend UI, built with React and Tailwind CSS, renders the Snakes And Ladders board and game status dynamically.
+- The frontend UI, built with React and Tailwind CSS, renders the Ludo board and game status dynamically.
 - State management is handled by Recoil for real-time updates on player actions.
 
 ---
